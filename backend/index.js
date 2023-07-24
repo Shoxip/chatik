@@ -40,10 +40,8 @@ app.post('/chat', async (req, res) => {
   const {username, message} = req.body;
 
   try {
-    // Создаем новый экземпляр модели ChatMessage с переданными значениями
     const newMessage = new ChatMessage({username, message});
 
-    // Сохраняем созданный экземпляр в базе данных с помощью асинхронной функции save()
     const savedMessage = await newMessage.save();
 
     return res.status(201).json(savedMessage);
