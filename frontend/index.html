@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Чат</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div id="chat"></div>
+<input type="text" id="username" placeholder="Введите ваше имя">
+<input type="text" id="message" placeholder="Введите сообщение">
+<button onclick="sendMessage()">Отправить</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+
+  const ip = '192.168.0.11'; // use IPv4, write on your console "ipconfig" (windows)
+  const socket_port = '3001';
+  const http_port = '3000';
+  const socket = io(`http://${ip}:${socket_port}`)
+
+  socket.on('newMessage', (message) => {
+    const chatDiv = document.getElementById('chat');
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = `${message.username}: ${message.message}`;
+    chatDiv.appendChild(messageDiv);
+  });
+
+  function sendMessage() {
+    const username = document.getElementById('username').value;
+    const message = document.getElementById('message').value;
+
+    socket.emit('sendMessage', { username, message });
+
+    document.getElementById('message').value = '';
+  }
+
+  // Получение старых сообщений
+  async function loadOldMessages() {
+    try {
+      const response = await fetch(`http://${ip}:${http_port}/chat`);
+      const messages = await response.json();
+      console.log(messages);
+      const chatDiv = document.getElementById('chat');
+
+      messages.forEach((message) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = `${message.username}: ${message.message}`;
+        chatDiv.appendChild(messageDiv);
+      });
+    } catch (error) {
+      console.error('Ошибка при получении старых сообщений:', error);
+    }
+  }
+
+  // Загрузка старых сообщений при загрузке страницы
+  window.addEventListener('load', () => {
+    loadOldMessages();
+  });
+</script>
+</body>
+</html>
